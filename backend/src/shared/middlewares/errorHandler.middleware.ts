@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { AppError } from "../errors/AppError";
 
 /**
  * Global Error Handling Middleware
@@ -32,30 +33,25 @@ import { Request, Response, NextFunction } from "express";
  * in the Express application.
  */
 
+
+
 export const errorHandler = (
   err: any,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  /**
-   * Determine the correct HTTP status code.
-   *
-   * If the error is an instance of AppError,
-   * it will contain a custom statusCode.
-   *
-   * Otherwise we fallback to 500
-   * which represents an Internal Server Error.
-   */
-  const statusCode = err.statusCode || 500;
+  console.error(err);
 
-  /**
-   * Send a standardized JSON error response.
-   * This ensures all API errors follow
-   * the same response structure.
-   */
-  res.status(statusCode).json({
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+  return res.status(500).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    message: "Internal Server Error",
   });
 };

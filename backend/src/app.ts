@@ -12,6 +12,7 @@ import notificationRoutes from "./modules/notification/notification.routes";
 import commentRoutes from "./modules/comment/comment.routes";
 import searchRoutes from "./modules/search/search.routes";
 import storyRoutes from "./modules/story/story.routes";
+import { errorHandler } from "./shared/middlewares/errorHandler.middleware";
 
 
 const app = express();
@@ -22,16 +23,21 @@ app.use(express.json());
 setupSwagger(app);
 app.use(morgan("dev"));
 
+
  
 
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/users", followRoutes);
-app.use("/api/v1/posts", postRoutes);
-app.use("/api/v1/likes", likeRoutes);
-app.use("/api/v1/users", notificationRoutes);
-app.use("/api/v1/posts", commentRoutes);
-app.use("/api/v1/search", searchRoutes);
-app.use("/api/v1/stories", storyRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/users", followRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/likes", likeRoutes);
+app.use("/api/users", notificationRoutes);
+app.use("/api/posts", commentRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/stories", storyRoutes);
+
+
+
+app.use(errorHandler);
 
 export default app;
