@@ -12,11 +12,10 @@ import { z } from "zod";
  * - password: minimum 6 characters
  */
 
- 
 export const registerSchema = z.object({
   body: z.object({
     username: z.string().min(3, "Username must be at least 3 characters"),
-
+    name: z.string().min(2, "Name is required"),
     email: z.string().email("Invalid email address"),
 
     password: z.string().min(6, "Password must be at least 6 characters"),

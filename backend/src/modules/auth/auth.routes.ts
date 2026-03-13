@@ -17,17 +17,32 @@ const router = express.Router();
  * @swagger
  * /auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register new user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/RegisterUser'
- *     responses:
- *       201:
- *         description: User registered successfully
+ *             type: object
+ *             required:
+ *               - name
+ *               - username
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Wasim Akram
+ *               username:
+ *                 type: string
+ *                 example: wasim
+ *               email:
+ *                 type: string
+ *                 example: wasim@email.com
+ *               password:
+ *                 type: string
+ *                 example: 123456
  */
 router.post(
   "/register",

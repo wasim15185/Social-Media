@@ -9,24 +9,44 @@ export const SearchService = {
   /**
    * Search users by username
    */
-  async searchUsers(query: string) {
-    const users = await prisma.user.findMany({
-      where: {
-        username: {
-          contains: query,
-          mode: "insensitive",
-        },
-      },
-      select: {
-        id: true,
-        username: true,
-        profileImage: true,
-      },
-      take: 10,
-    });
+ async searchUsers(query: string) {
 
-    return users;
-  },
+  const searchQuery = query.trim();
+
+  if (!searchQuery) {
+    return [];
+  }
+
+  const users = await prisma.user.findMany({
+    where: {
+      OR: [
+        {
+          username: {
+            contains: searchQuery,
+            mode: "insensitive",
+          },
+        },
+        {
+          name: {
+            contains: searchQuery,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      profileImage: true,
+    },
+
+    take: 10,
+  });
+
+  return users;
+},
 
   /**
    * Search posts by content

@@ -9,7 +9,7 @@ import { generateToken } from "../../shared/utils/jwt";
 
 export const AuthService = {
   async register(data: any) {
-    const { username, email, password } = data;
+    const { name, username, email, password } = data;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -23,6 +23,7 @@ export const AuthService = {
 
     const user = await prisma.user.create({
       data: {
+        name,
         username,
         email,
         password: hashedPassword,
@@ -57,6 +58,7 @@ export const AuthService = {
       user: {
         id: user.id,
         username: user.username,
+        name: user.name,
         email: user.email,
       },
       token,
