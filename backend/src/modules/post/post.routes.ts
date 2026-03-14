@@ -60,6 +60,8 @@ router.post(
  *     summary: Get feed posts with pagination
  *     description: Returns paginated list of posts for the social media feed.
  *     tags: [Posts]
+ *     security:
+ *       - BearerAuth: [] 
  *     parameters:
  *       - name: page
  *         in: query
@@ -79,7 +81,7 @@ router.post(
  *       200:
  *         description: Feed fetched successfully
  */
-router.get("/feed", PostController.getFeed);
+router.get("/feed", authMiddleware, PostController.getFeed);
 
 /**
  * @swagger
