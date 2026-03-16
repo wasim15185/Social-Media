@@ -118,9 +118,10 @@ export const PostService = {
       };
     });
 
+    console.log("Formatted Posts:", formattedPosts);
+
     return formattedPosts;
 
-// return posts;
 
   },
 
