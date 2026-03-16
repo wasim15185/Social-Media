@@ -1,6 +1,8 @@
 import { AppError } from "../../shared/errors/AppError";
 import { prisma } from "../../config/prisma";
 import { getPagination } from "../../shared/utils/pagination";
+import path from "path";
+import fs from "fs";
 
 /**
  * Post Service
@@ -31,38 +33,95 @@ export const PostService = {
   },
 
   /**
-   * Get feed posts with pagination
+   * ------------------------------------------------
+   * Get Feed Posts with Pagination
+   * ------------------------------------------------
+   * This method returns posts with author + images.
    *
-   * Pagination is important for social media feeds
-   * because returning thousands of posts would slow
-   * down the application.
+   * It also converts local image paths into full URLs
+   * so frontend can load them correctly.
    *
-   * Example:
-   * GET /api/posts/feed?page=1&limit=10
+   * Example transformation:
+   *
+   * DB value:
+   *   /uploads/users/wasim_31/posts/img.jpg
+   *
+   * API response:
+   *   http://localhost:5000/uploads/users/wasim_31/posts/img.jpg
+   *
+   * BUT external images like:
+   *   https://picsum.photos/...
+   * remain unchanged.
+   * ------------------------------------------------
    */
 
   async getFeed(page: number, limit: number) {
-   const { skip, take } = getPagination(page, limit);
+    /**
+     * Calculate pagination
+     */
+    const { skip, take } = getPagination(page, limit);
 
-   const posts = await prisma.post.findMany({
-     skip,
-     take,
-     include: {
-       author: {
-         select: {
-           id: true,
-           username: true,
-           profileImage: true,
-         },
-       },
-       images: true,
-     },
-     orderBy: {
-       createdAt: "desc",
-     },
-   });
+    /**
+     * Fetch posts from database
+     */
+    const posts = await prisma.post.findMany({
+      skip,
+      take,
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            profileImage: true,
+          },
+        },
+        images: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+ 
+    /**
+     * Convert image paths
+     */
+    const formattedPosts = posts.map((post) => {
+      /**
+       * Transform each image inside the post
+       */
+      const formattedImages = post.images.map((img) => {
+        /**
+         * Check if image is a local upload
+         * Local uploads start with "/uploads"
+         */
+        if (img.imageUrl.startsWith("/uploads")) {
+          return {
+            ...img,
+            imageUrl: `${process.env.SERVER_BASE_URL}:${process.env.SERVER_PORT}${img.imageUrl}`,
+          };
+        }
 
-   return posts;
+        /**
+         * If it's an external URL (picsum, cloudinary, etc.)
+         * return it unchanged
+         */
+        return img;
+      });
+
+    
+      /**
+       * Return updated post
+       */
+      return {
+        ...post,
+        images: formattedImages,
+      };
+    });
+
+    return formattedPosts;
+
+// return posts;
+
   },
 
   /**
@@ -92,6 +151,7 @@ export const PostService = {
   async deletePost(postId: number, userId: number) {
     const post = await prisma.post.findUnique({
       where: { id: postId },
+      include: { images: true },
     });
 
     if (!post) {
@@ -102,6 +162,20 @@ export const PostService = {
       throw new AppError("Not authorized to delete this post", 403);
     }
 
+    /**
+     * Remove images from disk
+     */
+    for (const image of post.images) {
+      const filePath = path.join(process.cwd(), image.imageUrl);
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    /**
+     * Delete post (cascade removes PostImage rows)
+     */
     await prisma.post.delete({
       where: { id: postId },
     });
