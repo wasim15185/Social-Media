@@ -1,29 +1,27 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import {prisma} from "../../config/prisma";
+import { prisma } from "../../config/prisma";
 import { AppError } from "../errors/AppError";
 
 /**
+ * ---------------------------------------------------------
  * Authentication Middleware
  * ---------------------------------------------------------
- * This middleware verifies JWT tokens sent in the request
- * Authorization header and attaches the authenticated user
- * information to the request object.
  *
- * Expected header format:
+ * Purpose:
+ * Verify JWT token and attach authenticated user info
+ * to the request object.
  *
+ * Expected Header:
  * Authorization: Bearer <JWT_TOKEN>
  *
- * Responsibilities:
- *
- * 1. Check if Authorization header exists
- * 2. Extract JWT token
- * 3. Verify token using JWT_SECRET
+ * Flow:
+ * 1. Check Authorization header
+ * 2. Extract token
+ * 3. Verify JWT token
  * 4. Fetch user from database
- * 5. Attach user information to req.user
- * 6. Allow request to continue
- *
- * If authentication fails → request is rejected.
+ * 5. Attach user info to req.user
+ * 6. Continue request
  */
 
 export const authMiddleware = async (
@@ -33,7 +31,7 @@ export const authMiddleware = async (
 ) => {
   try {
     /**
-     * Step 1
+     * STEP 1
      * Extract Authorization header
      */
     const authHeader = req.headers.authorization;
@@ -43,9 +41,8 @@ export const authMiddleware = async (
     }
 
     /**
-     * Step 2
-     * Expected format:
-     *
+     * STEP 2
+     * Extract token from:
      * Bearer TOKEN
      */
     const token = authHeader.split(" ")[1];
@@ -55,7 +52,7 @@ export const authMiddleware = async (
     }
 
     /**
-     * Step 3
+     * STEP 3
      * Verify JWT token
      */
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
@@ -63,11 +60,18 @@ export const authMiddleware = async (
     };
 
     /**
-     * Step 4
-     * Find user in database
+     * STEP 4
+     * Fetch user from database
+     *
+     * Only fetch necessary fields for performance
      */
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      },
     });
 
     if (!user) {
@@ -75,26 +79,26 @@ export const authMiddleware = async (
     }
 
     /**
-     * Step 5
-     * Attach authenticated user to request object
+     * STEP 5
+     * Attach authenticated user to request
      *
-     * Now controllers can access:
+     * Controllers can now access:
      *
      * req.user.id
+     * req.user.username
      */
     req.user = {
       id: user.id,
+      username: user.username,
+      email: user.email,
     };
 
     /**
-     * Step 6
+     * STEP 6
      * Continue request
      */
     next();
   } catch (error) {
-    /**
-     * JWT verification errors will also be caught here
-     */
     next(error);
   }
 };

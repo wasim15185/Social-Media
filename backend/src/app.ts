@@ -13,6 +13,7 @@ import commentRoutes from "./modules/comment/comment.routes";
 import searchRoutes from "./modules/search/search.routes";
 import storyRoutes from "./modules/story/story.routes";
 import { errorHandler } from "./shared/middlewares/errorHandler.middleware";
+import path from "path/win32";
 
 
 const app = express();
@@ -23,7 +24,7 @@ app.use(express.json());
 setupSwagger(app);
 app.use(morgan("dev"));
 
-
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
  
 
 app.use("/api/auth", authRoutes);

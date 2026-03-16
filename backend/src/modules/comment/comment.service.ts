@@ -24,6 +24,15 @@ export const CommentService = {
         userId,
         postId,
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profileImage: true,
+          },
+        },
+      },
     });
 
     /**
@@ -67,6 +76,7 @@ export const CommentService = {
   /**
    * Delete comment
    */
+
   async deleteComment(commentId: number, userId: number) {
     const comment = await prisma.comment.findUnique({
       where: { id: commentId },

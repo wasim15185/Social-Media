@@ -2,7 +2,7 @@ import express from "express";
 import { PostController } from "./post.controller";
 import { validateRequest } from "../../shared/middlewares/validateRequest";
 import { createPostSchema, updatePostSchema } from "./post.dto";
-import { uploadPostImages } from "../../shared/middlewares/upload.middleware";
+import { uploadPostImages } from "./../../shared/middlewares/upload.middleware";
 import { authMiddleware } from "../../shared/middlewares/auth.middleware";
 import { SavedPostController } from "./saved-post/savedPost.controller";
 

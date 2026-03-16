@@ -1,21 +1,60 @@
 import express from "express";
 import multer from "multer";
+import path from "path";
+import fs from "fs";
+
 import { StoryController } from "./story.controller";
 import { authMiddleware } from "../../shared/middlewares/auth.middleware";
 
 const router = express.Router();
 
 /**
+ * ------------------------------------------------
  * Multer Storage Configuration
+ * ------------------------------------------------
+ * Stories will be stored in:
+ *
+ * uploads/users/{username_userid}/stories
+ *
+ * Example:
+ * uploads/users/wasim_31/stories/1712456-story.jpg
  */
+
 const storage = multer.diskStorage({
-  destination: "uploads/stories",
+  destination: (req: any, file, cb) => {
+    const user = req.user;
+
+    const folderName = `${user.username}_${user.id}`;
+
+    const uploadPath = path.join(
+      process.cwd(),
+      "uploads",
+      "users",
+      folderName,
+      "stories",
+    );
+
+    /**
+     * Ensure folder exists
+     */
+    fs.mkdirSync(uploadPath, { recursive: true });
+
+    cb(null, uploadPath);
+  },
+
+  /**
+   * Unique filename
+   */
   filename: (req, file, cb) => {
-    const uniqueName = Date.now() + "-" + file.originalname;
+    const uniqueName = Date.now() + "-" + file.originalname.replace(/\s/g, "_");
+
     cb(null, uniqueName);
   },
 });
 
+/**
+ * Multer instance
+ */
 const upload = multer({
   storage,
   limits: {
@@ -24,18 +63,30 @@ const upload = multer({
 });
 
 /**
+ * ------------------------------------------------
+ * Swagger Tags
+ * ------------------------------------------------
+ */
+
+/**
  * @swagger
  * tags:
  *   name: Stories
- *   description: Story APIs (24 hour image stories)
+ *   description: APIs for managing image stories (24-hour expiry)
+ */
+
+/**
+ * ------------------------------------------------
+ * Create Story
+ * ------------------------------------------------
  */
 
 /**
  * @swagger
  * /stories:
  *   post:
- *     summary: Create a story
- *     description: Upload a story image. Story expires after 24 hours.
+ *     summary: Upload a new story
+ *     description: Upload a story image that expires after 24 hours
  *     tags: [Stories]
  *     security:
  *       - BearerAuth: []
@@ -55,6 +106,7 @@ const upload = multer({
  *       201:
  *         description: Story created successfully
  */
+
 router.post(
   "/",
   authMiddleware,
@@ -63,11 +115,17 @@ router.post(
 );
 
 /**
+ * ------------------------------------------------
+ * Get Stories
+ * ------------------------------------------------
+ */
+
+/**
  * @swagger
  * /stories:
  *   get:
- *     summary: Get stories
- *     description: Fetch all active stories (not expired).
+ *     summary: Fetch active stories
+ *     description: Returns stories that have not expired (24 hours)
  *     tags: [Stories]
  *     security:
  *       - BearerAuth: []
@@ -75,14 +133,21 @@ router.post(
  *       200:
  *         description: Stories fetched successfully
  */
+
 router.get("/", authMiddleware, StoryController.getStories);
+
+/**
+ * ------------------------------------------------
+ * View Story
+ * ------------------------------------------------
+ */
 
 /**
  * @swagger
  * /stories/{id}/view:
  *   post:
- *     summary: View story
- *     description: Mark a story as viewed by the current user.
+ *     summary: Mark story as viewed
+ *     description: Marks a story as viewed by the authenticated user
  *     tags: [Stories]
  *     security:
  *       - BearerAuth: []
@@ -95,8 +160,9 @@ router.get("/", authMiddleware, StoryController.getStories);
  *           type: integer
  *     responses:
  *       200:
- *         description: Story marked as viewed
+ *         description: Story viewed successfully
  */
+
 router.post("/:id/view", authMiddleware, StoryController.viewStory);
 
 export default router;

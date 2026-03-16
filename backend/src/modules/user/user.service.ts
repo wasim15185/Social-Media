@@ -1,15 +1,18 @@
-import { AppError } from "../../shared/errors/AppError";
 import { prisma } from "../../config/prisma";
+import { AppError } from "../../shared/errors/AppError";
 
 /**
+ * ------------------------------------------------
  * User Service
- * Handles all business logic related to users
+ * ------------------------------------------------
+ * Contains business logic related to user operations
  */
 
 export const UserService = {
   /**
-   * Get user profile by id
+   * Get user profile
    */
+
   async getUserProfile(userId: number) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -30,14 +33,39 @@ export const UserService = {
   },
 
   /**
-   * Update user profile
+   * Update profile fields
    */
+
   async updateProfile(userId: number, data: any) {
-    const user = await prisma.user.update({
+    return prisma.user.update({
       where: { id: userId },
       data,
     });
+  },
 
-    return user;
+  /**
+   * Update avatar
+   */
+
+  async updateAvatar(userId: number, avatarUrl: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        profileImage: avatarUrl,
+      },
+    });
+  },
+
+  /**
+   * Update cover photo
+   */
+
+  async updateCover(userId: number, coverUrl: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        coverImage: coverUrl,
+      },
+    });
   },
 };
