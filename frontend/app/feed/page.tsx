@@ -6,30 +6,33 @@ import { CreatePost } from "@/components/feed/create-post"
 import { FeedList } from "@/components/feed/feed-list"
 import { StoryBar } from "@/components/stories/story-bar"
 import { ProtectedRoute } from "./protected-route"
-
-
+import { SearchProvider } from "@/components/navbar/search/search-provider"
 
 export default function FeedPage() {
   return (
     <ProtectedRoute>
-      <div className="mx-auto grid max-w-7xl grid-cols-12 gap-6 p-6">
-        {/* LEFT SIDEBAR */}
-        <div className="col-span-3 hidden lg:block">
-          <LeftSidebar />
-        </div>
+       
+        <div className="min-h-screen bg-muted/40">
+          {/* LEFT SIDEBAR (FIXED) */}
+          <div className="fixed top-20 left-[calc(50%-600px)] hidden w-[260px] lg:block">
+            <LeftSidebar />
+          </div>
 
-        {/* FEED */}
-        <div className="col-span-12 space-y-4 lg:col-span-6">
-          <StoryBar />
-          <CreatePost />
-          <FeedList />
-        </div>
+          {/* RIGHT SIDEBAR (FIXED) */}
+          <div className="fixed top-20 right-[calc(50%-600px)] hidden w-[300px] lg:block">
+            <RightSidebar />
+          </div>
 
-        {/* RIGHT SIDEBAR */}
-        <div className="col-span-3 hidden lg:block">
-          <RightSidebar />
+          {/* FEED (CENTER) */}
+          <div className="mx-auto max-w-[1200px] px-4 pt-20">
+            <div className="mx-auto w-full max-w-[550px] space-y-4">
+              <StoryBar />
+              <CreatePost />
+              <FeedList />
+            </div>
+          </div>
         </div>
-      </div>
+       
     </ProtectedRoute>
   )
 }

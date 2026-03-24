@@ -14,6 +14,8 @@ import { CommentSection } from "./comment-section"
 
 import { useAuthStore } from "@/store/auth-store"
 
+import {useRouter} from "next/navigation"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +26,7 @@ import {
 import { apiClient } from "@/lib/network/api-client"
 import { EditPostModal } from "./edit-post-modal"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-
+ 
 export function PostCard({ post }: any) {
   const { user } = useAuthStore()
 
@@ -35,6 +37,8 @@ export function PostCard({ post }: any) {
   const [openEdit, setOpenEdit] = useState(false)
 
   const isOwner = user?.id === post.authorId
+
+  const router = useRouter()
 
   /**
    * Like Post
@@ -56,7 +60,7 @@ export function PostCard({ post }: any) {
    */
   const handleDelete = async () => {
     await apiClient.delete(`/posts/${post.id}`)
-    location.reload()
+    window.location.reload()
   }
 
   return (

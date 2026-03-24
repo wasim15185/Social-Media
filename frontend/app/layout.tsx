@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
- import { NavbarWrapper } from "@/components/navbar/navbar-wrapper"
+import { NavbarWrapper } from "@/components/navbar/navbar-wrapper"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -32,12 +32,14 @@ export default function RootLayout({
       )}
     >
       <body>
-           <ThemeProvider>
+        <ThemeProvider>
+         
             <NavbarWrapper />
 
             {children}
-          </ThemeProvider>
-       </body>
+         
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
