@@ -1,5 +1,6 @@
 import express from "express";
 import { SearchController } from "./search.controller";
+import { authMiddleware } from "../../shared/middlewares/auth.middleware";
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ const router = express.Router();
  *       200:
  *         description: Users found
  */
-router.get("/users", SearchController.searchUsers);
+router.get("/users",authMiddleware, SearchController.searchUsers);
 
 /**
  * @swagger
@@ -48,6 +49,6 @@ router.get("/users", SearchController.searchUsers);
  *       200:
  *         description: Posts found
  */
-router.get("/posts", SearchController.searchPosts);
+router.get("/posts", authMiddleware, SearchController.searchPosts);
 
 export default router;

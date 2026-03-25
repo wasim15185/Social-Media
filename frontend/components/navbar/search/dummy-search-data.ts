@@ -1,4 +1,4 @@
-import { SearchItem } from "./search"
+import { SearchItem } from "./type/search"
 
 export const users: SearchItem[] = [
   {
@@ -27,3 +27,5 @@ export const posts: SearchItem[] = [
     content: "Building a social media app 🔥",
   },
 ]
+
+export const data: SearchItem[] = [...users, ...posts]

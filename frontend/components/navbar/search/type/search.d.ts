@@ -1,13 +1,20 @@
+export type EntityType = "USER" | "POST"
+
+export type SearchTab = "user" | "post"
+
+/**
+ * ENTITY MODELS (UI-safe mapped data)
+ */
 export type UserItem = {
   id: number
-  type: "user"
+  type: "USER"
   username: string
   profileImage: string
 }
 
 export type PostItem = {
   id: number
-  type: "post"
+  type: "POST"
   content: string
 }
 
