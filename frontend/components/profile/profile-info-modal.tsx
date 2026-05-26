@@ -111,7 +111,7 @@ export function ProfileInfoModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {/* TRIGGER */}
-      <DialogTrigger asChild>
+      <DialogTrigger >
         <button>
           {children}
         </button>

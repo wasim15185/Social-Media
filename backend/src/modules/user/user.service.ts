@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../shared/errors/AppError";
 import { getFileUrl } from "../../shared/utils/getFileUrl";
-
+import { UpdateProfileInput } from "./user.dto";
 /**
  * ------------------------------------------------
  * User Service
@@ -9,14 +9,24 @@ import { getFileUrl } from "../../shared/utils/getFileUrl";
  * Contains business logic related to user operations
  */
 
-export const UserService = {
-  /**
-   * Get user profile
-   */
+/**
+ * ------------------------------------------------
+ * User Service
+ * ------------------------------------------------
+ */
 
+export const UserService = {
+
+  /**
+   * ------------------------------------------------
+   * Get user profile
+   * ------------------------------------------------
+   */
   async getUserProfile(userId: number) {
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
+
       include: {
         posts: {
           include: {
@@ -27,36 +37,87 @@ export const UserService = {
     });
 
     if (!user) {
-      throw new AppError("User not found", 404);
+      throw new AppError(
+        "User not found",
+        404
+      );
     }
 
+    /**
+     * Transform post image URLs
+     */
+    const transformedPosts =
+      user.posts.map((post) => ({
+
+        ...post,
+
+        images: post.images.map(
+          (image) => ({
+
+            ...image,
+
+            imageUrl:
+              getFileUrl(image.imageUrl),
+          })
+        ),
+      }));
+
+    /**
+     * Return transformed user
+     */
     return {
       ...user,
 
-      profileImage: getFileUrl(user.profileImage),
+      profileImage:
+        getFileUrl(user.profileImage),
 
-      coverImage: getFileUrl(user.coverImage),
+      coverImage:
+        getFileUrl(user.coverImage),
+
+      posts: transformedPosts,
     };
   },
 
   /**
-   * Update profile fields
+   * ------------------------------------------------
+   * Update profile
+   * ------------------------------------------------
    */
+  async updateProfile(
+    userId: number,
+    data: UpdateProfileInput
+  ) {
 
-  async updateProfile(userId: number, data: any) {
-    return prisma.user.update({
+    const user = await prisma.user.update({
       where: { id: userId },
+
       data,
     });
+
+    return {
+      ...user,
+
+      profileImage:
+        getFileUrl(user.profileImage),
+
+      coverImage:
+        getFileUrl(user.coverImage),
+    };
   },
 
   /**
+   * ------------------------------------------------
    * Update avatar
+   * ------------------------------------------------
    */
+  async updateAvatar(
+    userId: number,
+    avatarUrl: string
+  ) {
 
-  async updateAvatar(userId: number, avatarUrl: string) {
     const user = await prisma.user.update({
       where: { id: userId },
+
       data: {
         profileImage: avatarUrl,
       },
@@ -64,18 +125,28 @@ export const UserService = {
 
     return {
       ...user,
-      profileImage: getFileUrl(user.profileImage),
-      coverImage: getFileUrl(user.coverImage),
+
+      profileImage:
+        getFileUrl(user.profileImage),
+
+      coverImage:
+        getFileUrl(user.coverImage),
     };
   },
 
   /**
-   * Update cover photo
+   * ------------------------------------------------
+   * Update cover
+   * ------------------------------------------------
    */
+  async updateCover(
+    userId: number,
+    coverUrl: string
+  ) {
 
-  async updateCover(userId: number, coverUrl: string) {
     const user = await prisma.user.update({
       where: { id: userId },
+
       data: {
         coverImage: coverUrl,
       },
@@ -83,8 +154,12 @@ export const UserService = {
 
     return {
       ...user,
-      profileImage: getFileUrl(user.profileImage),
-      coverImage: getFileUrl(user.coverImage),
+
+      profileImage:
+        getFileUrl(user.profileImage),
+
+      coverImage:
+        getFileUrl(user.coverImage),
     };
   },
 
@@ -93,152 +168,184 @@ export const UserService = {
    * Get all users with follow status
    * ------------------------------------------------
    */
-  async getAllUsers(currentUserId: number, query?: string) {
-    /**
-     * Step 1: Get users (optional search)
-     */
+  async getAllUsers(
+    currentUserId: number,
+    query?: string
+  ) {
+
     const users = await prisma.user.findMany({
       where: {
         username: {
           contains: query || "",
           mode: "insensitive",
         },
+
         NOT: {
-          id: currentUserId, // exclude self
+          id: currentUserId,
         },
       },
+
       select: {
         id: true,
         username: true,
         profileImage: true,
         coverImage: true,
+        bio: true,
       },
     });
 
     /**
-     * Step 2: Get following list
+     * Get following list
      */
-    const following = await prisma.follow.findMany({
-      where: { followerId: currentUserId },
-      select: { followingId: true },
-    });
+    const following =
+      await prisma.follow.findMany({
+        where: {
+          followerId: currentUserId,
+        },
 
-    const followingIds = new Set(following.map((f) => f.followingId));
+        select: {
+          followingId: true,
+        },
+      });
+
+    const followingIds =
+      new Set(
+        following.map(
+          (f) => f.followingId
+        )
+      );
 
     /**
-     * Step 3: Add isFollowing flag
+     * Add isFollowing flag
      */
     return users.map((user) => ({
       ...user,
 
-      profileImage: getFileUrl(user.profileImage),
+      profileImage:
+        getFileUrl(user.profileImage),
 
-      coverImage: getFileUrl(user.coverImage),
+      coverImage:
+        getFileUrl(user.coverImage),
 
-      isFollowing: followingIds.has(user.id),
+      isFollowing:
+        followingIds.has(user.id),
     }));
   },
 
   /**
    * ------------------------------------------------
-   * Get following users (friends list)
+   * Get following users
    * ------------------------------------------------
    */
-  async getFollowingUsers(currentUserId: number) {
-    /**
-     * Step 1: Get follow relations
-     */
-    const following = await prisma.follow.findMany({
-      where: {
-        followerId: currentUserId,
-      },
-      include: {
-        following: {
-          select: {
-            id: true,
-            username: true,
-            profileImage: true,
-            coverImage: true,
-            bio: true,
+  async getFollowingUsers(
+    currentUserId: number
+  ) {
+
+    const following =
+      await prisma.follow.findMany({
+        where: {
+          followerId: currentUserId,
+        },
+
+        include: {
+          following: {
+            select: {
+              id: true,
+              username: true,
+              profileImage: true,
+              coverImage: true,
+              bio: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    /**
-     * Step 2: Format response
-     */
-   return following.map((f) => ({
-     ...f.following,
+    return following.map((f) => ({
+      ...f.following,
 
-     profileImage: getFileUrl(f.following.profileImage),
+      profileImage:
+        getFileUrl(
+          f.following.profileImage
+        ),
 
-     coverImage: getFileUrl(f.following.coverImage),
+      coverImage:
+        getFileUrl(
+          f.following.coverImage
+        ),
 
-     isFollowing: true,
-   }));
+      isFollowing: true,
+    }));
   },
 
   /**
    * ------------------------------------------------
-   * Get followers (users who follow the current user)
+   * Get followers
    * ------------------------------------------------
-   *
-   * Logic:
-   * - Find all follow records where:
-   *   followingId = currentUserId
-   * - Include follower user details
-   * - Return clean user list
    */
+  async getFollowers(
+    currentUserId: number
+  ) {
 
-  async getFollowers(currentUserId: number) {
-    /**
-     * Step 1: Get followers
-     */
-    const followers = await prisma.follow.findMany({
-      where: {
-        followingId: currentUserId,
-      },
-      include: {
-        follower: {
-          select: {
-            id: true,
-            username: true,
-            profileImage: true,
-            coverImage: true,
-            bio: true,
+    const followers =
+      await prisma.follow.findMany({
+        where: {
+          followingId: currentUserId,
+        },
+
+        include: {
+          follower: {
+            select: {
+              id: true,
+              username: true,
+              profileImage: true,
+              coverImage: true,
+              bio: true,
+            },
           },
         },
-      },
-    });
+      });
 
     /**
-     * Step 2: Get who I follow (IMPORTANT)
+     * Get my following list
      */
-    const myFollowing = await prisma.follow.findMany({
-      where: { followerId: currentUserId },
-      select: { followingId: true },
-    });
+    const myFollowing =
+      await prisma.follow.findMany({
+        where: {
+          followerId: currentUserId,
+        },
 
-    const followingSet = new Set(myFollowing.map((f) => f.followingId));
+        select: {
+          followingId: true,
+        },
+      });
+
+    const followingSet =
+      new Set(
+        myFollowing.map(
+          (f) => f.followingId
+        )
+      );
 
     /**
-     * Step 3: Add isFollowing flag
+     * Add follow status
      */
     return followers.map((f) => ({
       ...f.follower,
 
-      profileImage: getFileUrl(f.follower.profileImage),
+      profileImage:
+        getFileUrl(
+          f.follower.profileImage
+        ),
 
-      coverImage: getFileUrl(f.follower.coverImage),
+      coverImage:
+        getFileUrl(
+          f.follower.coverImage
+        ),
 
-      isFollowing: followingSet.has(f.follower.id),
+      isFollowing:
+        followingSet.has(
+          f.follower.id
+        ),
     }));
   },
-
-
-
-
-
-  
 };

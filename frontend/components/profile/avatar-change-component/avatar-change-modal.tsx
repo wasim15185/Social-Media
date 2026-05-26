@@ -103,7 +103,7 @@ export function AvatarChangeModal({
       /**
        * Close modal
        */
-      // setOpen(false)
+      setOpen(false)
     } catch (err) {
       console.error(err)
 
@@ -116,7 +116,7 @@ export function AvatarChangeModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {/* OPEN BUTTON */}
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger >{children}</DialogTrigger>
 
       {/* MODAL */}
       <DialogContent className="overflow-hidden p-0 sm:max-w-md">

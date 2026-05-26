@@ -107,6 +107,7 @@ export default function ProfilePage() {
         <div className="col-span-12 space-y-4 lg:col-span-6">
           <ProfileTabs tab={tab} setTab={setTab} />
 
+          {/* Posts tab - show create post box and user's posts */}
           {tab === "posts" && (
             <>
               <CreatePostBox />
@@ -114,14 +115,27 @@ export default function ProfilePage() {
             </>
           )}
 
+          {/* Photos tab - show all images from user's posts */}
           {tab === "photos" && (
-            <div className="grid grid-cols-3 gap-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-32 rounded-lg bg-muted" />
-              ))}
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+              {profileUser.posts
+                .flatMap((post) => post.images)
+                .map((image) => (
+                  <div
+                    key={image.id}
+                    className="relative aspect-square overflow-hidden rounded-xl"
+                  >
+                    <img
+                      src={image.url}
+                      alt="Post"
+                      className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                    />
+                  </div>
+                ))}
             </div>
           )}
-
+          {/* Saved tab - show message for now (implementing saved posts is a
+          future task) */}
           {tab === "saved" && (
             <div className="p-6 text-center text-muted-foreground">
               No saved posts yet
