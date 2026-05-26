@@ -5,9 +5,8 @@ import Image from "next/image"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-
 import { Image as ImageIcon } from "lucide-react"
-
+import { Textarea } from "@/components/ui/textarea"
 import { apiClient } from "@/lib/network/api-client"
 
 export function CreatePost() {
@@ -72,7 +71,7 @@ export function CreatePost() {
     <Card className="space-y-4 p-4">
       {/* TEXT INPUT */}
 
-      <textarea
+      <Textarea
         placeholder="Start a post..."
         className="w-full resize-none rounded-md border p-3 outline-none"
         value={content}

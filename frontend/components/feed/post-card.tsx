@@ -14,7 +14,7 @@ import { CommentSection } from "./comment-section"
 
 import { useAuthStore } from "@/store/auth-store"
 
-import {useRouter} from "next/navigation"
+import { useRouter } from "next/navigation"
 
 import {
   DropdownMenu,
@@ -26,7 +26,8 @@ import {
 import { apiClient } from "@/lib/network/api-client"
 import { EditPostModal } from "./edit-post-modal"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
- 
+import Link from "next/link"
+
 export function PostCard({ post }: any) {
   const { user } = useAuthStore()
 
@@ -66,16 +67,20 @@ export function PostCard({ post }: any) {
   return (
     <Card className="space-y-3 p-4">
       {/* HEADER */}
-      
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Avatar className="cursor-pointer h-10 w-10">
-            <AvatarImage src={post.author.profileImage} />
-            <AvatarFallback>{post.author.username.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <Link href={`/${post.author.username}`}>
+            <Avatar className="h-10 w-10 cursor-pointer">
+              <AvatarImage src={post.author.profileImage} />
+              <AvatarFallback>{post.author.username.charAt(0)}</AvatarFallback>
+            </Avatar>
+          </Link>
 
           <div>
+            <Link className="hover:text-blue-700 hover:underline" href={`/${post.author.username}`}>
             <p className="font-semibold">{post.author.username}</p>
+            </Link>
 
             <p className="text-xs text-muted-foreground">
               {new Date(post.createdAt).toLocaleString()}
@@ -112,7 +117,6 @@ export function PostCard({ post }: any) {
 
       {/* IMAGE */}
 
-     
       {post.images?.length > 0 && (
         <Image
           src={post.images[0].imageUrl}
@@ -121,7 +125,6 @@ export function PostCard({ post }: any) {
           height={400}
           className="rounded-lg"
         />
-         
       )}
 
       {/* ACTIONS */}

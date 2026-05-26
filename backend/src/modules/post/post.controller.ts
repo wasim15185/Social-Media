@@ -123,16 +123,19 @@ export const PostController = {
    * Pagination prevents loading thousands of posts.
    */
   getFeed: asyncHandler(async (req: Request, res: Response) => {
-    /**
-     * Read pagination query params
-     */
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    const userId = req.user.id;
+
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
 
     /**
-     * Fetch posts from service
+     * 🔥 Pass userId here
      */
-    const posts = await PostService.getFeed(page, limit);
+    const posts = await PostService.getFeed(userId, page, limit);
 
     sendResponse(res, 200, "Feed fetched successfully", posts);
   }),

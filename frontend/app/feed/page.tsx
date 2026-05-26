@@ -6,7 +6,6 @@ import { CreatePost } from "@/components/feed/create-post"
 import { FeedList } from "@/components/feed/feed-list"
 import { StoryBar } from "@/components/stories/story-bar"
 import { ProtectedRoute } from "./protected-route"
-import { SearchProvider } from "@/components/navbar/search/search-provider"
 
 export default function FeedPage() {
   return (
@@ -24,7 +23,7 @@ export default function FeedPage() {
           </div>
 
           {/* FEED (CENTER) */}
-          <div className="mx-auto max-w-[1200px] px-4 pt-20">
+          <div className="mx-auto max-w-[1200px] px-4 pt-6">
             <div className="mx-auto w-full max-w-[550px] space-y-4">
               <StoryBar />
               <CreatePost />

@@ -6,7 +6,7 @@ import { z } from "zod";
 export const updateProfileSchema = z.object({
   body: z.object({
     bio: z.string().max(160).optional(),
-    profileImage: z.string().optional(),
-    coverImage: z.string().optional()
+    // profileImage: z.string().optional(),
+    // coverImage: z.string().optional()
   })
 });

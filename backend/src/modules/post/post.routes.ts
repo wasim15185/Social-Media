@@ -57,29 +57,32 @@ router.post(
  * @swagger
  * /posts/feed:
  *   get:
- *     summary: Get feed posts with pagination
- *     description: Returns paginated list of posts for the social media feed.
+ *     summary: Get personalized feed
+ *     description: |
+ *       Returns posts from:
+ *       - The authenticated user
+ *       - Users the authenticated user follows
+ *
+ *       Results are paginated.
  *     tags: [Posts]
  *     security:
- *       - BearerAuth: [] 
+ *       - BearerAuth: []
  *     parameters:
  *       - name: page
  *         in: query
- *         required: false
- *         description: Page number
  *         schema:
  *           type: integer
  *           example: 1
  *       - name: limit
  *         in: query
- *         required: false
- *         description: Number of posts per page
  *         schema:
  *           type: integer
  *           example: 10
  *     responses:
  *       200:
  *         description: Feed fetched successfully
+ *       401:
+ *         description: Unauthorized
  */
 router.get("/feed", authMiddleware, PostController.getFeed);
 

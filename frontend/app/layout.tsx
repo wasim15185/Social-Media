@@ -2,8 +2,9 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/utils"
 import { NavbarWrapper } from "@/components/navbar/navbar-wrapper"
+import { Toaster } from "@/components/ui/sonner"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -33,13 +34,19 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-         
-            <NavbarWrapper />
-
-            {children}
-         
+          <NavbarWrapper />
+          {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
   )
 }
+
+// function Footer() {
+//   return (
+//     <footer className="mx-auto my-3 max-w-[1200px] text-center text-sm text-muted-foreground">
+//       &copy; {new Date().getFullYear()} MyApp. All rights reserved.
+//     </footer>
+//   )
+// }

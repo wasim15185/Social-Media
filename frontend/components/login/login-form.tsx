@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/utils"
 import { useAuth } from "@/hooks/useAuth"
 import { useAuthStore } from "@/store/auth-store"
 

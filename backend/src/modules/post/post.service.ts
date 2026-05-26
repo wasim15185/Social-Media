@@ -55,75 +55,86 @@ export const PostService = {
    * ------------------------------------------------
    */
 
-  async getFeed(page: number, limit: number) {
-    /**
-     * Calculate pagination
-     */
-    const { skip, take } = getPagination(page, limit);
+  async getFeed(userId: number, page: number, limit: number) {
+  /**
+   * ------------------------------------------------
+   * Step 1: Pagination
+   * ------------------------------------------------
+   */
+  const { skip, take } = getPagination(page, limit)
 
-    /**
-     * Fetch posts from database
-     */
-    const posts = await prisma.post.findMany({
-      skip,
-      take,
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            profileImage: true,
-          },
+  /**
+   * ------------------------------------------------
+   * Step 2: Get following users
+   * ------------------------------------------------
+   */
+  const following = await prisma.follow.findMany({
+    where: { followerId: userId },
+    select: { followingId: true },
+  })
+
+  /**
+   * Extract IDs
+   */
+  const followingIds = following.map((f) => f.followingId)
+
+  /**
+   * Include self posts also
+   */
+  const authorIds = [...followingIds, userId]
+
+  /**
+   * ------------------------------------------------
+   * Step 3: Fetch posts
+   * ------------------------------------------------
+   */
+  const posts = await prisma.post.findMany({
+    where: {
+      authorId: {
+        in: authorIds,
+      },
+    },
+    skip,
+    take,
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          profileImage: true,
         },
-        images: true,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
- 
-    /**
-     * Convert image paths
-     */
-    const formattedPosts = posts.map((post) => {
-      /**
-       * Transform each image inside the post
-       */
-      const formattedImages = post.images.map((img) => {
-        /**
-         * Check if image is a local upload
-         * Local uploads start with "/uploads"
-         */
-        if (img.imageUrl.startsWith("/uploads")) {
-          return {
-            ...img,
-            imageUrl: `${process.env.SERVER_BASE_URL}:${process.env.SERVER_PORT}${img.imageUrl}`,
-          };
+      images: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  })
+
+  /**
+   * ------------------------------------------------
+   * Step 4: Format image URLs
+   * ------------------------------------------------
+   */
+  const formattedPosts = posts.map((post) => {
+    const formattedImages = post.images.map((img) => {
+      if (img.imageUrl.startsWith("/uploads")) {
+        return {
+          ...img,
+          imageUrl: `${process.env.SERVER_BASE_URL}:${process.env.SERVER_PORT}${img.imageUrl}`,
         }
+      }
+      return img
+    })
 
-        /**
-         * If it's an external URL (picsum, cloudinary, etc.)
-         * return it unchanged
-         */
-        return img;
-      });
+    return {
+      ...post,
+      images: formattedImages,
+    }
+  })
 
-    
-      /**
-       * Return updated post
-       */
-      return {
-        ...post,
-        images: formattedImages,
-      };
-    });
-
-    console.log("Formatted Posts:", formattedPosts);
-
-    return formattedPosts;
-
-
-  },
+  return formattedPosts
+},
 
   /**
    * Get single post
