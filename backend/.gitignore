@@ -4,4 +4,11 @@ node_modules
 
 /src/generated/prisma
 
-/uploads/users/
+# Uploaded files
+uploads/
+
+# Logs
+*.log
+
+# Build
+dist/
