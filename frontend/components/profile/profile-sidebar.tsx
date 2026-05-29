@@ -4,12 +4,7 @@ import { Progress } from "@/components/ui/progress"
 export function ProfileSidebar() {
   return (
     <div className="space-y-4">
-      {/* PROFILE COMPLETION */}
-      <Card className="p-4">
-        <h3 className="mb-2 font-semibold">Complete Your Profile</h3>
-        <Progress value={75} />
-        <p className="mt-2 text-sm text-muted-foreground">75%</p>
-      </Card>
+       
 
       {/* ABOUT */}
       <Card className="space-y-2 p-4">

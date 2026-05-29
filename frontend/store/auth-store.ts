@@ -37,7 +37,7 @@ export type User = {
  */
 type AuthState = {
   /**
-   * Current authenticated user
+   * Current logged in user
    */
   user: User | null
 
@@ -47,23 +47,32 @@ type AuthState = {
   token: string | null
 
   /**
-   * Auth status
+   * Authentication status
    */
   isAuthenticated: boolean
 
   /**
-   * Login user
+   * Login
    */
   login: (user: User, token: string) => void
 
   /**
-   * Update current user
-   * (useful after profile/avatar update)
+   * Replace full user object
    */
   setUser: (user: User) => void
 
   /**
-   * Logout user
+   * Partial update
+   *
+   * Useful for:
+   * - avatar update
+   * - cover update
+   * - bio update
+   */
+  updateUser: (updates: Partial<User>) => void
+
+  /**
+   * Logout
    */
   logout: () => void
 }
@@ -96,12 +105,24 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       /**
-       * Update user
+       * Replace user
        */
       setUser: (user) =>
-        set((state) => ({
-          ...state,
+        set({
           user,
+        }),
+
+      /**
+       * Partial update user
+       */
+      updateUser: (updates) =>
+        set((state) => ({
+          user: state.user
+            ? {
+                ...state.user,
+                ...updates,
+              }
+            : null,
         })),
 
       /**
@@ -110,14 +131,14 @@ export const useAuthStore = create<AuthState>()(
       logout: () =>
         set({
           user: null,
+
           token: null,
+
           isAuthenticated: false,
         }),
     }),
+
     {
-      /**
-       * Local storage key
-       */
       name: "auth-storage",
     }
   )

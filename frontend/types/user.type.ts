@@ -1,16 +1,22 @@
-
-type PostImage = {
+export type ImageResponseType = {
   id: number
-  url: string
+
+  imageUrl: string
 }
 
-type Post = {
+export type PostResponseType = {
   id: number
+
   content: string
 
-  images: PostImage[]
-}
+  createdAt: string
 
+  likeCount: number
+
+  commentCount: number
+
+  images: ImageResponseType[]
+}
 
 export type UserResponseType = {
   id: number
@@ -31,5 +37,5 @@ export type UserResponseType = {
 
   postCount: number
 
-  posts: Post[]
+  posts: PostResponseType[]
 }
