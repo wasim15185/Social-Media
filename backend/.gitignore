@@ -11,7 +11,5 @@ uploads/
 *.log
 
 
-# Build
-backend/uploads/
 
 
