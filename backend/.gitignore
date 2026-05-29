@@ -10,5 +10,8 @@ uploads/
 # Logs
 *.log
 
+
 # Build
-dist/
+backend/uploads/
+
+
