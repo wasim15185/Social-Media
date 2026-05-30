@@ -1,5 +1,6 @@
-import {prisma} from "../../config/prisma";
+import { prisma } from "../../config/prisma";
 import { AppError } from "../../shared/errors/AppError";
+import { getFileUrl } from "../../shared/utils/getFileUrl";
 
 /**
  * Comment Service
@@ -69,8 +70,16 @@ export const CommentService = {
         createdAt: "asc",
       },
     });
-
-    return comments;
+    // Map profile image to full URL
+    return comments.map((comment) => {
+      return {
+        ...comment,
+        user: {
+          ...comment.user,
+          profileImage: getFileUrl(comment.user.profileImage),
+        },
+      };
+    });
   },
 
   /**

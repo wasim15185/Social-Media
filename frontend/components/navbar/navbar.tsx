@@ -142,7 +142,7 @@ export function Navbar() {
             <NotificationBell />
 
             {/* Profile */}
-            <Link href={`/profile/${user?.username}`}>
+            <Link href={`/${user?.id}`}>
               <Avatar className="h-8 w-8 cursor-pointer">
                 <AvatarImage src={user?.profileImage || "/avatar.png"} />
                 <AvatarFallback>

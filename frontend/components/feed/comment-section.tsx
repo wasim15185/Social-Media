@@ -74,13 +74,13 @@ export function CommentSection({ postId }: { postId: number }) {
         <div key={comment.id} className="flex items-start gap-3">
           {/* Avatar */}
           <Avatar className="cursor-pointer">
-            {comment.user.profileImage ? (
+            {comment.user.profileImage && (
               <AvatarImage src={comment.user.profileImage} />
-            ) : (
-              <AvatarFallback>
-                {comment.user.username.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
             )}
+            
+            <AvatarFallback>
+              {comment.user.username.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
 
           {/* Comment bubble */}

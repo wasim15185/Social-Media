@@ -55,7 +55,20 @@ export const PostService = {
    * ------------------------------------------------
    */
 
-  async getFeed(userId: number, page: number, limit: number) {
+   async getFeed(userId: number, page: number, limit: number) {
+  /**
+   * ------------------------------------------------
+   * Helper Function
+   * ------------------------------------------------
+   */
+  const buildFileUrl = (path?: string | null) => {
+    if (!path) return null
+
+    return path.startsWith("/uploads")
+      ? `${process.env.SERVER_BASE_URL}:${process.env.SERVER_PORT}${path}`
+      : path
+  }
+
   /**
    * ------------------------------------------------
    * Step 1: Pagination
@@ -69,8 +82,12 @@ export const PostService = {
    * ------------------------------------------------
    */
   const following = await prisma.follow.findMany({
-    where: { followerId: userId },
-    select: { followingId: true },
+    where: {
+      followerId: userId,
+    },
+    select: {
+      followingId: true,
+    },
   })
 
   /**
@@ -85,7 +102,7 @@ export const PostService = {
 
   /**
    * ------------------------------------------------
-   * Step 3: Fetch posts
+   * Step 3: Fetch Posts
    * ------------------------------------------------
    */
   const posts = await prisma.post.findMany({
@@ -113,25 +130,22 @@ export const PostService = {
 
   /**
    * ------------------------------------------------
-   * Step 4: Format image URLs
+   * Step 4: Format URLs
    * ------------------------------------------------
    */
-  const formattedPosts = posts.map((post) => {
-    const formattedImages = post.images.map((img) => {
-      if (img.imageUrl.startsWith("/uploads")) {
-        return {
-          ...img,
-          imageUrl: `${process.env.SERVER_BASE_URL}:${process.env.SERVER_PORT}${img.imageUrl}`,
-        }
-      }
-      return img
-    })
+  const formattedPosts = posts.map((post) => ({
+    ...post,
 
-    return {
-      ...post,
-      images: formattedImages,
-    }
-  })
+    author: {
+      ...post.author,
+      profileImage: buildFileUrl(post.author.profileImage),
+    },
+
+    images: post.images.map((img) => ({
+      ...img,
+      imageUrl: buildFileUrl(img.imageUrl),
+    })),
+  }))
 
   return formattedPosts
 },

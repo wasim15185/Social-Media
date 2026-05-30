@@ -72,14 +72,20 @@ export function PostCard({ post }: any) {
         <div className="flex items-center gap-3">
           <Link href={`/${post.author.id}`}>
             <Avatar className="h-10 w-10 cursor-pointer">
-              <AvatarImage src={post.author.profileImage} />
+              <AvatarImage
+                src={post.author.profileImage}
+                alt={`Profile image for ${post.author.username}`}
+              />
               <AvatarFallback>{post.author.username.charAt(0)}</AvatarFallback>
             </Avatar>
           </Link>
 
           <div>
-            <Link className="hover:text-blue-700 hover:underline" href={`/${post.author.id}`}>
-            <p className="font-semibold">{post.author.username}</p>
+            <Link
+              className="hover:text-blue-700 hover:underline"
+              href={`/${post.author.id}`}
+            >
+              <p className="font-semibold">{post.author.username}</p>
             </Link>
 
             <p className="text-xs text-muted-foreground">
