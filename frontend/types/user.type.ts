@@ -15,6 +15,8 @@ export type PostResponseType = {
 
   commentCount: number
 
+  authorId: number
+
   images: ImageResponseType[]
 }
 
@@ -36,6 +38,14 @@ export type UserResponseType = {
   followingCount: number
 
   postCount: number
+
+  // author:{
+  //   id: number
+
+  //   profileImage: string
+
+  //   username: string
+  // }
 
   posts: PostResponseType[]
 }

@@ -39,7 +39,7 @@ export default function ProfilePage() {
        
       try {
         const res = await apiClient.get(`/users/${userId}`)
-
+console.log(res.data.data)
         setProfileUser(res.data.data)
       } catch (error) {
         console.error(error)
@@ -76,6 +76,7 @@ export default function ProfilePage() {
           followingCount: profileUser.followingCount,
           postsCount: profileUser.postCount,
         }}
+        isOwner={authUser?.id === profileUser.id}
         onEdit={() => {}}
       />
 
@@ -92,6 +93,7 @@ export default function ProfilePage() {
               posts={profileUser.posts}
               username={profileUser.username}
               profileImage={profileUser.profileImage}
+              currentUserId={authUser?.id || -2}
             />
           )}
 

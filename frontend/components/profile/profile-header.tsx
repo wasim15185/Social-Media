@@ -13,41 +13,27 @@ import AvatarChangeModal from "./avatar-change-component/avatar-change-modal"
 import { ProfileInfoModal } from "./profile-info-modal"
 
 import { CoverPhotoModal } from "./cover-photo-component/cover-photo-modal"
+
 type Props = {
   user: {
     username: string
-
     name?: string
-
     bio?: string | null
-
     profileImage?: string | null
-
     coverImage?: string | null
-
     followersCount: number
-
     followingCount: number
-
     postsCount: number
   }
+
+  isOwner: boolean
 
   onEdit: () => void
 }
 
-export function ProfileHeader({ user, onEdit }: Props) {
-  /**
-   * ---------------------------------------------
-   * Display name
-   * ---------------------------------------------
-   */
+export function ProfileHeader({ user, isOwner, onEdit }: Props) {
   const displayName = user.name || user.username
 
-  /**
-   * ---------------------------------------------
-   * Gradient fallback
-   * ---------------------------------------------
-   */
   const gradients = [
     "from-indigo-500 to-purple-500",
     "from-pink-500 to-orange-500",
@@ -63,7 +49,6 @@ export function ProfileHeader({ user, onEdit }: Props) {
       ======================================================= */}
 
       <div className="relative h-52 w-full overflow-hidden">
-        {/* Cover Image */}
         {user.coverImage ? (
           <Image
             src={user.coverImage}
@@ -76,25 +61,19 @@ export function ProfileHeader({ user, onEdit }: Props) {
           <div className={`h-full w-full bg-gradient-to-r ${gradient}`} />
         )}
 
-        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/10" />
 
-        {/* Cover Edit Button */}
-        <div className="absolute top-4 right-4">
-          {/* Future Cover Modal */}
-
-          {/* <CoverPhotoModal
-            currentCover={user.coverImage}
-          > */}
-          <CoverPhotoModal currentCover={user.coverImage}>
-            <Button variant="secondary" className="gap-2" onClick={onEdit}>
-              <Images className="h-4 w-4" />
-              Edit Cover
-            </Button>
-          </CoverPhotoModal>
-
-          {/* </CoverPhotoModal> */}
-        </div>
+        {/* Only Profile Owner Can Edit Cover */}
+        {isOwner && (
+          <div className="absolute top-4 right-4">
+            <CoverPhotoModal currentCover={user.coverImage}>
+              <Button variant="secondary" className="gap-2" onClick={onEdit}>
+                <Images className="h-4 w-4" />
+                Edit Cover
+              </Button>
+            </CoverPhotoModal>
+          </div>
+        )}
       </div>
 
       {/* =======================================================
@@ -107,11 +86,28 @@ export function ProfileHeader({ user, onEdit }: Props) {
               AVATAR
           ====================================== */}
 
-          <AvatarChangeModal
-            currentAvatar={user.profileImage}
-            displayName={displayName}
-          >
-            <div className="relative h-28 w-28 cursor-pointer">
+          {isOwner ? (
+            <AvatarChangeModal
+              currentAvatar={user.profileImage}
+              displayName={displayName}
+            >
+              <div className="relative h-28 w-28 cursor-pointer">
+                {user.profileImage ? (
+                  <Image
+                    src={user.profileImage}
+                    alt={`${displayName} avatar`}
+                    fill
+                    className="rounded-full border-4 border-background object-cover shadow-lg"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-background bg-muted text-2xl font-bold shadow-lg">
+                    {getInitials(displayName)}
+                  </div>
+                )}
+              </div>
+            </AvatarChangeModal>
+          ) : (
+            <div className="relative h-28 w-28">
               {user.profileImage ? (
                 <Image
                   src={user.profileImage}
@@ -125,7 +121,7 @@ export function ProfileHeader({ user, onEdit }: Props) {
                 </div>
               )}
             </div>
-          </AvatarChangeModal>
+          )}
 
           {/* ======================================
               USER DETAILS
@@ -135,11 +131,13 @@ export function ProfileHeader({ user, onEdit }: Props) {
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{displayName}</h1>
 
-              <ProfileInfoModal currentName={user.name} currentBio={user.bio}>
-                <Button size="icon" variant="outline">
-                  <SquarePen className="h-4 w-4" />
-                </Button>
-              </ProfileInfoModal>
+              {isOwner && (
+                <ProfileInfoModal currentName={user.name} currentBio={user.bio}>
+                  <Button size="icon" variant="outline">
+                    <SquarePen className="h-4 w-4" />
+                  </Button>
+                </ProfileInfoModal>
+              )}
             </div>
 
             <p className="text-sm text-muted-foreground">@{user.username}</p>
