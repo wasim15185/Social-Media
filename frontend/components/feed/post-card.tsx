@@ -39,7 +39,7 @@ export function PostCard({ post }: any) {
 
   const isOwner = user?.id === post.authorId
 
-   console.log(post)
+  
 
   /**
    * Like Post

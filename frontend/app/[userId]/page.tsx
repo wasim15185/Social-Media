@@ -39,7 +39,7 @@ export default function ProfilePage() {
        
       try {
         const res = await apiClient.get(`/users/${userId}`)
-console.log(res.data.data)
+ 
         setProfileUser(res.data.data)
       } catch (error) {
         console.error(error)
