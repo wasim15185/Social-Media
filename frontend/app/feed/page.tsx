@@ -24,7 +24,6 @@ export default function FeedPage() {
           {/* FEED (CENTER) */}
           <div className="mx-auto max-w-[1200px] px-4 pt-6">
             <div className="mx-auto w-full max-w-[550px] space-y-4">
-              <StoryBar />
               <CreatePost />
               <FeedList />
             </div>
