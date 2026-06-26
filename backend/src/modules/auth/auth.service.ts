@@ -3,6 +3,7 @@ import { prisma } from "../../config/prisma";
 import { AppError } from "../../shared/errors/AppError";
 import { generateToken } from "../../shared/utils/jwt";
 import { Prisma } from "../../generated/prisma/client";
+import {getFileUrl} from "./../../shared/utils/getFileUrl"
 /**
  * Auth Service
  * Handles user registration and login
@@ -68,6 +69,9 @@ export const AuthService = {
           name: user.name,
           username: user.username,
           email: user.email,
+          profileImage: getFileUrl(user.profileImage), // ← add
+          coverImage: getFileUrl(user.coverImage), // ← add
+          bio: user.bio, // ← add
         },
         token,
       };
@@ -94,6 +98,18 @@ export const AuthService = {
     }
   },
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   /**
    * Login user
    */
@@ -131,6 +147,9 @@ export const AuthService = {
         name: user.name,
         username: user.username,
         email: user.email,
+        profileImage: getFileUrl(user.profileImage), // ← add
+        coverImage: getFileUrl(user.coverImage), // ← add
+        bio: user.bio,
       },
       token,
     };

@@ -23,60 +23,40 @@ export const UserService = {
    * ------------------------------------------------
    */
   async getUserProfile(userId: number) {
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-
-      include: {
-        posts: {
-          include: {
-            images: true,
-          },
-        },
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      posts: {
+        include: { images: true },
       },
-    });
+    },
+  });
 
-    if (!user) {
-      throw new AppError(
-        "User not found",
-        404
-      );
-    }
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
 
-    /**
-     * Transform post image URLs
-     */
-    const transformedPosts =
-      user.posts.map((post) => ({
+  /**
+   * Strip password before sending to client
+   */
+  const { password, ...safeUser } = user;
 
-        ...post,
+  const transformedPosts = user.posts.map((post) => ({
+    ...post,
+    images: post.images.map((image) => ({
+      ...image,
+      imageUrl: getFileUrl(image.imageUrl),
+    })),
+  }));
 
-        images: post.images.map(
-          (image) => ({
-
-            ...image,
-
-            imageUrl:
-              getFileUrl(image.imageUrl),
-          })
-        ),
-      }));
-
-    /**
-     * Return transformed user
-     */
-    return {
-      ...user,
-
-      profileImage:
-        getFileUrl(user.profileImage),
-
-      coverImage:
-        getFileUrl(user.coverImage),
-
-      posts: transformedPosts,
-    };
-  },
+  
+  return {
+    ...safeUser,
+    profileImage: getFileUrl(user.profileImage),
+    coverImage: getFileUrl(user.coverImage),
+    posts: transformedPosts,
+  };
+},
 
   /**
    * ------------------------------------------------

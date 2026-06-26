@@ -1,8 +1,15 @@
+"use client"
+
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Bookmark, Users, UserPlus } from "lucide-react"
+import { useAuthStore } from "@/store/auth-store"
+import { useProfile } from "@/hooks/useProfile"
 
 export function LeftSidebar() {
+  const { user } = useAuthStore()
+  const { profile, loading } = useProfile(user?.id)
+
   return (
     <Card className="overflow-hidden p-0">
       {/* COVER STRIP */}
@@ -12,23 +19,33 @@ export function LeftSidebar() {
       <div className="flex flex-col items-center px-4 pb-4 text-center">
         <div className="bg-gradient-brand -mt-8 rounded-full p-[3px]">
           <Avatar className="h-16 w-16 border-[3px] border-card">
-            <AvatarImage src="/avatar.png" />
-            <AvatarFallback>WA</AvatarFallback>
+            <AvatarImage src={profile?.profileImage || "/avatar.png"} />
+            <AvatarFallback>
+              {profile?.username?.slice(0, 2).toUpperCase() || "U"}
+            </AvatarFallback>
           </Avatar>
         </div>
 
-        <h2 className="mt-3 font-semibold">Wasim Akram</h2>
-        <p className="text-sm text-muted-foreground">Full Stack Developer</p>
+        <h2 className="mt-3 font-semibold">
+          {loading ? "Loading..." : profile?.name || profile?.username}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {profile?.bio || "No bio yet"}
+        </p>
       </div>
 
       {/* STATS */}
       <div className="grid grid-cols-2 gap-px border-t bg-border">
         <div className="bg-card px-3 py-3 text-center">
-          <p className="font-mono text-base font-semibold">120</p>
+          <p className="font-mono text-base font-semibold">
+            {profile?.followerCount ?? 0}
+          </p>
           <p className="text-xs text-muted-foreground">Followers</p>
         </div>
         <div className="bg-card px-3 py-3 text-center">
-          <p className="font-mono text-base font-semibold">80</p>
+          <p className="font-mono text-base font-semibold">
+            {profile?.followingCount ?? 0}
+          </p>
           <p className="text-xs text-muted-foreground">Following</p>
         </div>
       </div>
