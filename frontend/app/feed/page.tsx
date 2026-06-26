@@ -4,7 +4,6 @@ import { LeftSidebar } from "@/components/sidebar/left-sidebar"
 import { RightSidebar } from "@/components/sidebar/right-sidebar"
 import { CreatePost } from "@/components/feed/create-post"
 import { FeedList } from "@/components/feed/feed-list"
-import { StoryBar } from "@/components/stories/story-bar"
 import { ProtectedRoute } from "./protected-route"
 
 export default function FeedPage() {
