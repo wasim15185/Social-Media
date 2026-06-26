@@ -5,100 +5,101 @@ import Image from "next/image"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Image as ImageIcon } from "lucide-react"
+import { Image as ImageIcon, X } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { apiClient } from "@/lib/network/api-client"
+import { useAuthStore } from "@/store/auth-store"
 
 export function CreatePost() {
+  const { user } = useAuthStore()
+
   const [content, setContent] = useState("")
   const [images, setImages] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
-  /**
-   * Handle image selection
-   */
   const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-
     const selected = files.slice(0, 5)
-
     setImages(selected)
-
-    const previewUrls = selected.map((file) => URL.createObjectURL(file))
-
-    setPreviews(previewUrls)
+    setPreviews(selected.map((file) => URL.createObjectURL(file)))
   }
 
-  /**
-   * Create post
-   */
- const handlePost = async () => {
-   if (!content && images.length === 0) return
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index))
+    setPreviews((prev) => prev.filter((_, i) => i !== index))
+  }
 
-   const formData = new FormData()
-   formData.append("content", content)
+  const handlePost = async () => {
+    if (!content && images.length === 0) return
 
-   images.forEach((img) => {
-     formData.append("images", img)
-   })
+    const formData = new FormData()
+    formData.append("content", content)
+    images.forEach((img) => formData.append("images", img))
 
-   try {
-     setLoading(true) // ← you were missing this!
+    try {
+      setLoading(true)
 
-     await apiClient.post("/posts", formData, {
-       // THIS IS THE IMPORTANT LINE
-       headers: {
-         "Content-Type": undefined, // let axios set the correct multipart boundary
-       },
-     })
+      await apiClient.post("/posts", formData, {
+        headers: { "Content-Type": undefined },
+      })
 
-     // reset form
-     setContent("")
-     setImages([])
-     setPreviews([])
-
-     window.location.reload() // or better: use router.refresh() / context
-   } catch (err) {
-     console.error("Upload error:", err)
-     // show toast here if you have one
-   } finally {
-     setLoading(false)
-   }
- }
+      setContent("")
+      setImages([])
+      setPreviews([])
+      window.location.reload()
+    } catch (err) {
+      console.error("Upload error:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <Card className="space-y-4 p-4">
-      {/* TEXT INPUT */}
+    <Card className="p-4">
+      <div className="flex gap-3">
+        <div className="bg-gradient-brand h-fit rounded-full p-[2px]">
+          <Avatar className="h-10 w-10 border-2 border-card">
+            <AvatarImage src={user?.profileImage || "/avatar.png"} />
+            <AvatarFallback>
+              {user?.username?.slice(0, 2).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
-      <Textarea
-        placeholder="Start a post..."
-        className="w-full resize-none rounded-md border p-3 outline-none"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
-
-      {/* IMAGE PREVIEW */}
+        <Textarea
+          placeholder="Share something with your network..."
+          className="min-h-[44px] flex-1 resize-none rounded-2xl border-none bg-muted px-4 py-3 outline-none focus-visible:ring-1 focus-visible:ring-[var(--brand-violet)]"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      </div>
 
       {previews.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2">
           {previews.map((src, index) => (
-            <Image
-              key={index}
-              src={src}
-              alt="preview"
-              width={400}
-              height={300}
-              className="rounded-lg object-cover"
-            />
+            <div key={index} className="relative">
+              <Image
+                src={src}
+                alt="preview"
+                width={400}
+                height={300}
+                className="h-40 w-full rounded-xl object-cover"
+              />
+              <button
+                onClick={() => removeImage(index)}
+                className="absolute top-2 right-2 rounded-full bg-black/60 p-1 text-white"
+              >
+                <X size={14} />
+              </button>
+            </div>
           ))}
         </div>
       )}
 
-      {/* ACTIONS */}
-
-      <div className="flex items-center justify-between">
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
+      <div className="mt-3 flex items-center justify-between border-t pt-3">
+        <label className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-[var(--brand-orange)] hover:bg-accent">
           <ImageIcon size={16} />
           Photo
           <input
@@ -110,7 +111,11 @@ export function CreatePost() {
           />
         </label>
 
-        <Button onClick={handlePost} disabled={loading}>
+        <Button
+          onClick={handlePost}
+          disabled={loading}
+          className="bg-gradient-brand text-white hover:opacity-90"
+        >
           {loading ? "Posting..." : "Post"}
         </Button>
       </div>

@@ -55,100 +55,100 @@ export const PostService = {
    * ------------------------------------------------
    */
 
-   async getFeed(userId: number, page: number, limit: number) {
-  /**
-   * ------------------------------------------------
-   * Helper Function
-   * ------------------------------------------------
-   */
-  const buildFileUrl = (path?: string | null) => {
-    if (!path) return null
+  async getFeed(userId: number, page: number, limit: number) {
+    /**
+     * ------------------------------------------------
+     * Helper Function
+     * ------------------------------------------------
+     */
+    const buildFileUrl = (path?: string | null) => {
+      if (!path) return null;
 
-    return path.startsWith("/uploads")
-      ? `${process.env.SERVER_BASE_URL}:${process.env.SERVER_PORT}${path}`
-      : path
-  }
+      return path.startsWith("/uploads")
+        ? `${process.env.SERVER_BASE_URL}:${process.env.SERVER_PORT}${path}`
+        : path;
+    };
 
-  /**
-   * ------------------------------------------------
-   * Step 1: Pagination
-   * ------------------------------------------------
-   */
-  const { skip, take } = getPagination(page, limit)
+    /**
+     * ------------------------------------------------
+     * Step 1: Pagination
+     * ------------------------------------------------
+     */
+    const { skip, take } = getPagination(page, limit);
 
-  /**
-   * ------------------------------------------------
-   * Step 2: Get following users
-   * ------------------------------------------------
-   */
-  const following = await prisma.follow.findMany({
-    where: {
-      followerId: userId,
-    },
-    select: {
-      followingId: true,
-    },
-  })
-
-  /**
-   * Extract IDs
-   */
-  const followingIds = following.map((f) => f.followingId)
-
-  /**
-   * Include self posts also
-   */
-  const authorIds = [...followingIds, userId]
-
-  /**
-   * ------------------------------------------------
-   * Step 3: Fetch Posts
-   * ------------------------------------------------
-   */
-  const posts = await prisma.post.findMany({
-    where: {
-      authorId: {
-        in: authorIds,
+    /**
+     * ------------------------------------------------
+     * Step 2: Get following users
+     * ------------------------------------------------
+     */
+    const following = await prisma.follow.findMany({
+      where: {
+        followerId: userId,
       },
-    },
-    skip,
-    take,
-    include: {
-      author: {
-        select: {
-          id: true,
-          username: true,
-          profileImage: true,
+      select: {
+        followingId: true,
+      },
+    });
+
+    /**
+     * Extract IDs
+     */
+    const followingIds = following.map((f) => f.followingId);
+
+    /**
+     * Include self posts also
+     */
+    const authorIds = [...followingIds, userId];
+
+    /**
+     * ------------------------------------------------
+     * Step 3: Fetch Posts
+     * ------------------------------------------------
+     */
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: {
+          in: authorIds,
         },
       },
-      images: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })
+      skip,
+      take,
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            profileImage: true,
+          },
+        },
+        images: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-  /**
-   * ------------------------------------------------
-   * Step 4: Format URLs
-   * ------------------------------------------------
-   */
-  const formattedPosts = posts.map((post) => ({
-    ...post,
+    /**
+     * ------------------------------------------------
+     * Step 4: Format URLs
+     * ------------------------------------------------
+     */
+    const formattedPosts = posts.map((post) => ({
+      ...post,
 
-    author: {
-      ...post.author,
-      profileImage: buildFileUrl(post.author.profileImage),
-    },
+      author: {
+        ...post.author,
+        profileImage: buildFileUrl(post.author.profileImage),
+      },
 
-    images: post.images.map((img) => ({
-      ...img,
-      imageUrl: buildFileUrl(img.imageUrl),
-    })),
-  }))
+      images: post.images.map((img) => ({
+        ...img,
+        imageUrl: buildFileUrl(img.imageUrl),
+      })),
+    }));
 
-  return formattedPosts
-},
+    return formattedPosts;
+  },
 
   /**
    * Get single post
@@ -215,34 +215,75 @@ export const PostService = {
    * Only the post owner can update their post.
    */
 
-  async updatePost(postId: number, userId: number, data: any) {
-    /**
-     * Find post first
-     */
+  async updatePost(
+    postId: number,
+    userId: number,
+    data: { content?: string; keepImageIds?: number[]; newImages?: string[] },
+  ) {
     const post = await prisma.post.findUnique({
       where: { id: postId },
+      include: { images: true },
     });
 
     if (!post) {
       throw new AppError("Post not found", 404);
     }
 
-    /**
-     * Check ownership
-     */
     if (post.authorId !== userId) {
       throw new AppError("Not authorized to edit this post", 403);
     }
 
+    const { content, keepImageIds, newImages } = data;
+
     /**
-     * Update post content
+     * Step 1: যেই image গুলো keepImageIds এ নেই, সেগুলো delete করো
+     */
+    if (keepImageIds !== undefined) {
+      const imagesToDelete = post.images.filter(
+        (img) => !keepImageIds.includes(img.id),
+      );
+
+      for (const image of imagesToDelete) {
+        const filePath = path.join(process.cwd(), image.imageUrl);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+
+      if (imagesToDelete.length > 0) {
+        await prisma.postImage.deleteMany({
+          where: { id: { in: imagesToDelete.map((img) => img.id) } },
+        });
+      }
+    }
+
+    /**
+     * Step 2: নতুন image গুলো add করো
+     */
+    if (newImages && newImages.length > 0) {
+      const startOrder = keepImageIds
+        ? keepImageIds.length
+        : post.images.length;
+
+      await prisma.postImage.createMany({
+        data: newImages.map((img, index) => ({
+          postId,
+          imageUrl: img,
+          order: startOrder + index,
+        })),
+      });
+    }
+
+    /**
+     * Step 3: content আপডেট করো
      */
     const updatedPost = await prisma.post.update({
       where: { id: postId },
       data: {
-        ...data,
+        ...(content !== undefined ? { content } : {}),
         isEdited: true,
       },
+      include: { images: true },
     });
 
     return updatedPost;

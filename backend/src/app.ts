@@ -14,6 +14,8 @@ import followRoutes from "./modules/follow/follow.routes";
 import notificationRoutes from "./modules/notification/notification.routes";
 import commentRoutes from "./modules/comment/comment.routes";
 import searchRoutes from "./modules/search/search.routes";
+import trendingRoutes from "./modules/trending/trending.route";
+import chatRoutes from "./modules/chat/chat.routes"; 
 
 import { errorHandler } from "./shared/middlewares/errorHandler.middleware";
 
@@ -69,7 +71,8 @@ app.use("/api/posts", commentRoutes);
 app.use("/api/likes", likeRoutes);
 
 app.use("/api/search", searchRoutes);
-
+app.use("/api/trending", trendingRoutes);
+app.use("/api/chat", chatRoutes);
 
 /**
  * ------------------------------------------------

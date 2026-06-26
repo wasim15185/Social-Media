@@ -114,19 +114,11 @@ export const ChatController = {
    * Authentication required.
    */
   getMessages: asyncHandler(async (req: Request, res: Response) => {
-    /**
-     * Extract conversation ID from URL params
-     */
+    const userId = req.user!.id; // ← ADD THIS
     const conversationId = Number(req.params.conversationId);
 
-    /**
-     * Fetch messages from service
-     */
-    const messages = await ChatService.getMessages(conversationId);
+    const messages = await ChatService.getMessages(conversationId, userId); // ← pass userId
 
-    /**
-     * Send standardized response
-     */
     sendResponse(res, 200, "Messages fetched successfully", messages);
   }),
 

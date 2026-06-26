@@ -98,20 +98,29 @@ export const PostController = {
    * Only the post owner can edit the post.
    */
   updatePost: asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
+  const user = req.user!;
+  const userId = user.id;
+  const postId = Number(req.params.id);
 
-    /**
-     * Extract post ID from route
-     */
-    const postId = Number(req.params.id);
+  const files = req.files as Express.Multer.File[];
+  const folder = `${user.username}_${user.id}`;
 
-    /**
-     * Update post via service
-     */
-    const post = await PostService.updatePost(postId, userId, req.body);
+  const newImages =
+    files?.map((file) => `/uploads/users/${folder}/posts/${file.filename}`) ||
+    [];
 
-    sendResponse(res, 200, "Post updated successfully", post);
-  }),
+  const keepImageIds = req.body.keepImageIds
+    ? JSON.parse(req.body.keepImageIds)
+    : undefined;
+
+  const post = await PostService.updatePost(postId, userId, {
+    content: req.body.content,
+    keepImageIds,
+    newImages,
+  });
+
+  sendResponse(res, 200, "Post updated successfully", post);
+}),
 
   /**
    * ------------------------------------------------

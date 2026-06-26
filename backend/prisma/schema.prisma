@@ -98,7 +98,7 @@ model Comment {
   userId    Int
   parentId  Int?
 
-  post      Post @relation(fields: [postId], references: [id])
+  post      Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   user      User @relation(fields: [userId], references: [id])
 
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
@@ -113,7 +113,7 @@ model Like {
   postId  Int
   userId  Int
 
-  post    Post @relation(fields: [postId], references: [id])
+  post    Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   user    User @relation(fields: [userId], references: [id])
 
   @@unique([postId, userId])
@@ -151,7 +151,7 @@ model Notification {
   sender      User @relation("NotificationSender", fields: [senderId], references: [id])
   receiver    User @relation("NotificationReceiver", fields: [receiverId], references: [id])
 
-  post        Post? @relation(fields: [postId], references: [id])
+  post        Post? @relation(fields: [postId], references: [id],onDelete: SetNull)
 }
 
 
@@ -164,7 +164,7 @@ model SavedPost {
   postId    Int
 
   user      User @relation(fields: [userId], references: [id])
-  post      Post @relation(fields: [postId], references: [id])
+  post      Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 

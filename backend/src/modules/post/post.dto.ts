@@ -21,5 +21,6 @@ export const updatePostSchema = z.object({
       .min(1)
       .max(500)
       .optional()
-  })
+  }),
+  keepImageIds: z.string().optional(), // JSON stringified array, e.g. "[1,2,3]"
 });

@@ -1,24 +1,52 @@
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Bookmark, Users, UserPlus } from "lucide-react"
 
 export function LeftSidebar() {
   return (
-    <Card className="space-y-4 p-4">
-      <div className="flex flex-col items-center text-center">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src="/avatar.png" />
-          <AvatarFallback>WA</AvatarFallback>
-        </Avatar>
+    <Card className="overflow-hidden p-0">
+      {/* COVER STRIP */}
+      <div className="bg-gradient-brand h-16" />
 
-        <h2 className="mt-2 font-semibold">Wasim Akram</h2>
+      {/* PROFILE */}
+      <div className="flex flex-col items-center px-4 pb-4 text-center">
+        <div className="bg-gradient-brand -mt-8 rounded-full p-[3px]">
+          <Avatar className="h-16 w-16 border-[3px] border-card">
+            <AvatarImage src="/avatar.png" />
+            <AvatarFallback>WA</AvatarFallback>
+          </Avatar>
+        </div>
 
+        <h2 className="mt-3 font-semibold">Wasim Akram</h2>
         <p className="text-sm text-muted-foreground">Full Stack Developer</p>
       </div>
 
-      <div className="space-y-1 text-sm">
-        <p>Followers: 120</p>
-        <p>Following: 80</p>
-        <p>Saved Posts</p>
+      {/* STATS */}
+      <div className="grid grid-cols-2 gap-px border-t bg-border">
+        <div className="bg-card px-3 py-3 text-center">
+          <p className="font-mono text-base font-semibold">120</p>
+          <p className="text-xs text-muted-foreground">Followers</p>
+        </div>
+        <div className="bg-card px-3 py-3 text-center">
+          <p className="font-mono text-base font-semibold">80</p>
+          <p className="text-xs text-muted-foreground">Following</p>
+        </div>
+      </div>
+
+      {/* QUICK LINKS */}
+      <div className="space-y-1 border-t p-2">
+        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-accent">
+          <Bookmark size={16} className="text-[var(--brand-orange)]" />
+          Saved Posts
+        </button>
+        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-accent">
+          <Users size={16} className="text-[var(--brand-violet)]" />
+          Connections
+        </button>
+        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-accent">
+          <UserPlus size={16} className="text-[var(--brand-pink)]" />
+          Find Friends
+        </button>
       </div>
     </Card>
   )

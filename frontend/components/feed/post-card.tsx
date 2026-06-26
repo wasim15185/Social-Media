@@ -6,15 +6,20 @@ import Image from "next/image"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
-import { MoreVertical, Pencil, Trash } from "lucide-react"
+import {
+  MoreVertical,
+  Pencil,
+  Trash,
+  Heart,
+  MessageCircle,
+  Bookmark,
+} from "lucide-react"
 
 import { toggleLike } from "@/hooks/useLike"
 import { savePost } from "@/hooks/useSavePost"
 import { CommentSection } from "./comment-section"
 
 import { useAuthStore } from "@/store/auth-store"
-
-import { useRouter } from "next/navigation"
 
 import {
   DropdownMenu,
@@ -34,16 +39,10 @@ export function PostCard({ post }: any) {
   const [likes, setLikes] = useState(post.likeCount)
   const [liked, setLiked] = useState(false)
   const [showComments, setShowComments] = useState(false)
-
   const [openEdit, setOpenEdit] = useState(false)
 
   const isOwner = user?.id === post.authorId
 
-  
-
-  /**
-   * Like Post
-   */
   const handleLike = async () => {
     setLiked(!liked)
     setLikes(liked ? likes - 1 : likes + 1)
@@ -56,49 +55,46 @@ export function PostCard({ post }: any) {
     }
   }
 
-  /**
-   * Delete Post
-   */
   const handleDelete = async () => {
     await apiClient.delete(`/posts/${post.id}`)
     window.location.reload()
   }
 
   return (
-    <Card className="space-y-3 p-4">
+    <Card className="overflow-hidden p-0">
       {/* HEADER */}
-
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between p-4 pb-3">
         <div className="flex items-center gap-3">
           <Link href={`/${post.author.id}`}>
-            <Avatar className="h-10 w-10 cursor-pointer">
-              <AvatarImage
-                src={post.author.profileImage}
-                alt={`Profile image for ${post.author.username}`}
-              />
-              <AvatarFallback>{post.author.username.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="bg-gradient-brand rounded-full p-[2px]">
+              <Avatar className="h-10 w-10 border-2 border-card">
+                <AvatarImage
+                  src={post.author.profileImage}
+                  alt={`Profile image for ${post.author.username}`}
+                />
+                <AvatarFallback>
+                  {post.author.username.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           </Link>
 
           <div>
             <Link
-              className="hover:text-blue-700 hover:underline"
+              className="font-semibold hover:underline"
               href={`/${post.author.id}`}
             >
-              <p className="font-semibold">{post.author.username}</p>
+              {post.author.username}
             </Link>
-
-            <p className="text-xs text-muted-foreground">
+            <p className="font-mono text-xs text-muted-foreground">
               {new Date(post.createdAt).toLocaleString()}
             </p>
           </div>
         </div>
 
-        {/* Owner menu */}
-
         {isOwner && (
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger className="rounded-full p-1.5 hover:bg-accent">
               <MoreVertical size={18} />
             </DropdownMenuTrigger>
 
@@ -107,8 +103,10 @@ export function PostCard({ post }: any) {
                 <Pencil size={16} className="mr-2" />
                 Edit
               </DropdownMenuItem>
-
-              <DropdownMenuItem onClick={handleDelete} className="text-red-500">
+              <DropdownMenuItem
+                onClick={handleDelete}
+                className="text-destructive"
+              >
                 <Trash size={16} className="mr-2" />
                 Delete
               </DropdownMenuItem>
@@ -118,42 +116,59 @@ export function PostCard({ post }: any) {
       </div>
 
       {/* CONTENT */}
+      {post.content && (
+        <p className="px-4 pb-3 text-sm leading-relaxed">{post.content}</p>
+      )}
 
-      <p>{post.content}</p>
-
-      {/* IMAGE */}
-
+      {/* IMAGE — edge to edge */}
       {post.images?.length > 0 && (
-        <Image
-          src={post.images[0].imageUrl}
-          alt={`Image for post ${post.id} by ${post.author.username} ${post.createdAt}`}
-          width={600}
-          height={400}
-          className="rounded-lg"
-        />
+        <div className="relative aspect-[4/3] w-full bg-muted">
+          <Image
+            src={post.images[0].imageUrl}
+            alt={`Image for post ${post.id} by ${post.author.username} ${post.createdAt}`}
+            fill
+            sizes="(max-width: 768px) 100vw, 550px"
+            className="object-cover"
+          />
+        </div>
       )}
 
       {/* ACTIONS */}
-
-      <div className="flex justify-between pt-2">
-        <Button variant="ghost" onClick={handleLike}>
-          ❤️ {likes}
+      <div className="flex items-center justify-between px-2 py-1">
+        <Button
+          variant="ghost"
+          onClick={handleLike}
+          className={`flex-1 gap-2 ${liked ? "text-[var(--brand-pink)]" : ""}`}
+        >
+          <Heart size={18} fill={liked ? "var(--brand-pink)" : "none"} />
+          <span className="font-mono text-sm">{likes}</span>
         </Button>
 
-        <Button variant="ghost" onClick={() => setShowComments(!showComments)}>
-          💬 {post.commentCount}
+        <Button
+          variant="ghost"
+          onClick={() => setShowComments(!showComments)}
+          className="flex-1 gap-2 text-[var(--brand-violet)]"
+        >
+          <MessageCircle size={18} />
+          <span className="font-mono text-sm">{post.commentCount}</span>
         </Button>
 
-        <Button variant="ghost" onClick={() => savePost(post.id)}>
-          🔖 Save
+        <Button
+          variant="ghost"
+          onClick={() => savePost(post.id)}
+          className="flex-1 gap-2 text-[var(--brand-orange)]"
+        >
+          <Bookmark size={18} />
+          Save
         </Button>
       </div>
 
       {/* COMMENTS */}
-
-      {showComments && <CommentSection postId={post.id} />}
-
-      {/* EDIT MODAL */}
+      {showComments && (
+        <div className="border-t px-4 pb-4">
+          <CommentSection postId={post.id} />
+        </div>
+      )}
 
       <EditPostModal open={openEdit} setOpen={setOpenEdit} post={post} />
     </Card>

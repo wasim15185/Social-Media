@@ -147,10 +147,10 @@ router.get("/:id", PostController.getPost);
 router.patch(
   "/:id",
   authMiddleware,
+  uploadPostImages.array("images", 5),
   validateRequest(updatePostSchema),
-  PostController.updatePost
+  PostController.updatePost,
 );
-
 /**
  * @swagger
  * /posts/{postId}/save:
