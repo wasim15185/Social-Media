@@ -14,7 +14,6 @@ import followRoutes from "./modules/follow/follow.routes";
 import notificationRoutes from "./modules/notification/notification.routes";
 import commentRoutes from "./modules/comment/comment.routes";
 import searchRoutes from "./modules/search/search.routes";
-import storyRoutes from "./modules/story/story.routes";
 
 import { errorHandler } from "./shared/middlewares/errorHandler.middleware";
 
@@ -71,7 +70,6 @@ app.use("/api/likes", likeRoutes);
 
 app.use("/api/search", searchRoutes);
 
-app.use("/api/stories", storyRoutes);
 
 /**
  * ------------------------------------------------
