@@ -69,6 +69,7 @@ export const AuthService = {
           name: user.name,
           username: user.username,
           email: user.email,
+          role: user.role, // 👈 add this
           profileImage: getFileUrl(user.profileImage), // ← add
           coverImage: getFileUrl(user.coverImage), // ← add
           bio: user.bio, // ← add
@@ -147,6 +148,7 @@ export const AuthService = {
         name: user.name,
         username: user.username,
         email: user.email,
+        role: user.role, // 👈 add this
         profileImage: getFileUrl(user.profileImage), // ← add
         coverImage: getFileUrl(user.coverImage), // ← add
         bio: user.bio,

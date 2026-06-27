@@ -28,6 +28,8 @@ export type User = {
   followingCount?: number
 
   postCount?: number
+
+  role: "USER" | "ADMIN" // 👈 add this
 }
 
 /**

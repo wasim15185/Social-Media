@@ -13,6 +13,11 @@ datasource db {
 }
 
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
  model User {
   id            Int      @id @default(autoincrement())
   name          String   @default("User")
@@ -23,6 +28,7 @@ datasource db {
   bio           String?
   profileImage  String?
   coverImage    String?
+
 
 
   createdAt     DateTime @default(now())
@@ -48,6 +54,8 @@ datasource db {
   notificationsSent     Notification[] @relation("NotificationSender")
 
   conversationParticipants ConversationParticipant[]
+
+  role UserRole @default(USER)
 }
 
 
